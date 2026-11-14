@@ -7,12 +7,31 @@ import yfinance as yf
 import json
 import random
 
-startbalance = 100
-maxwork = 25
-minwork = 5
+"""
+const
+STARTBALANCE
+const
+MAX_WORK
+const
+MIN_WORK
+const
+TOKEN
+const
+handler
+const
+intents
+const
+bot
+const
+BANK_FILE
+"""
+
+STARTBALANCE = 100
+MAX_WORK = 25
+MIN_WORK = 5
 
 load_dotenv()
-token = os.getenv("DISCORD_TOKEN")
+TOKEN = os.getenv("DISCORD_TOKEN")
 
 handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="w")
 
@@ -22,26 +41,26 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix="$", intents=intents)
 
-bankfile = "bank.json"
+BANK_FILE = "bank.json"
 
 def loadbank():
-    if not os.path.exists(bankfile):
+    if not os.path.exists(BANK_FILE):
         return {}
     try:
-        with open(bankfile, "r") as f:
+        with open(BANK_FILE, "r") as f:
             return json.load(f)
     except json.JSONDecodeError:
         print("corrupted json file")
         return {}
 
 def savebank(data):
-    with open(bankfile, "w") as f:
+    with open(BANK_FILE, "w") as f:
         json.dump(data, f)
 
 def start(username):
     bank = loadbank()
     if username not in bank:
-        bank[username] = {"balance": startbalance}
+        bank[username] = {"balance": STARTBALANCE}
         savebank(bank)
 
 @bot.event
@@ -70,7 +89,7 @@ async def balance(ctx):
 
     else:
         start(username)
-        await ctx.reply(f"Welcome, {ctx.author.mention}! Your starting balance is 💵{startbalance}.")
+        await ctx.reply(f"Welcome, {ctx.author.mention}! Your starting balance is 💵{STARTBALANCE}.")
 
 
 
@@ -84,12 +103,12 @@ async def work(ctx):
 
     username = ctx.author.name
     bank = loadbank()
-    earned = random.randint(minwork, maxwork)
+    earned = random.randint(MIN_WORK, MAX_WORK)
 
     if username not in bank:
         start(username)
         bank = loadbank()
-        await ctx.reply(f"Welcome, {ctx.author.mention}! Your starting balance is 💵{startbalance}.")
+        await ctx.reply(f"Welcome, {ctx.author.mention}! Your starting balance is 💵{STARTBALANCE}.")
     
     bank[username]["balance"] += earned
     savebank(bank)
@@ -194,7 +213,7 @@ async def buystock(ctx, ticker, amount):
     if username not in bank:
         start(username)
         bank = loadbank()
-        await ctx.reply(f"Welcome, {ctx.author.mention}! Your starting balance is 💵{startbalance}.")
+        await ctx.reply(f"Welcome, {ctx.author.mention}! Your starting balance is 💵{STARTBALANCE}.")
 
     try:
         price = round(yf.Ticker(ticker).history(period="1d")["Close"].iloc[0], 2)
@@ -240,7 +259,7 @@ async def sellstock(ctx, ticker, amount):
     if username not in bank:
         start(username)
         bank = loadbank()
-        await ctx.reply(f"Welcome, {ctx.author.mention}! Your starting balance is 💵{startbalance}.")
+        await ctx.reply(f"Welcome, {ctx.author.mention}! Your starting balance is 💵{STARTBALANCE}.")
         await ctx.reply("error")
 
     if ticker not in bank[username]:
@@ -290,4 +309,4 @@ async def price(ctx, ticker: str):
 
 
 
-bot.run(token=token, log_handler=handler, log_level=logging.DEBUG)
+bot.run(TOKEN=TOKEN, log_handler=handler, log_level=logging.DEBUG)
